@@ -1,44 +1,35 @@
-# zap-rns
+# zap-proto/rns
 
-> **Docs:** [Resource Name Service over ZAP](https://zap-proto.dev/docs/protocols/rns) · part of the [ZAP Protocol](https://zap-proto.io)
+> **Docs:** [PQ-RNS](https://zap-proto.dev/docs/protocols/rns) · part of the [ZAP Protocol](https://zap-proto.io)
 
+PQ-RNS — Resource Name Service over ZAP. Resolves human-readable names to post-quantum identity records (`kemPubKey + sigPubKey`) signed by the issuing registry. No CA, no DNS provider in the trust path.
 
-Resource Name Service over ZAP — service naming bound to KEM keypair.
+## What's here
 
-[**zap-proto.io**](https://zap-proto.io) · [Spec](https://github.com/zap-proto/spec) · [Paper](https://github.com/zap-proto/papers/tree/main/rns-identity-binding) · [Discord](https://zap-proto.io/discord)
+| | |
+|---|---|
+| `schema/zap_rns.zap` | Wire schema — `Record`, `Query`, `Response` |
+| `did.go` | Canonical DID computation (`did:zap:<base32(SHA3-256(kemPk‖sigPk))>`) |
+| `did_test.go` | Go conformance test using the KAT fixture |
+| `testdata/pqrns_kat.json` | Cross-language KAT fixture — every SDK must reproduce |
 
-`zap-rns` layers service discovery semantics over the [ZAP transport](https://github.com/zap-proto/spec). Post-quantum confidentiality, mutual authentication, and zero-copy parse come from the wire; this repo only adds the service discovery message shape.
+## Cross-language KAT
 
-## Status
+The canonical DID for fixed inputs (1216 × `0x01` for KEM, 1984 × `0x02` for sig) is:
 
-**v0.1 — schema-first.** This repo currently ships:
+```
+did:zap:ok7klbkh4p3udjjeo4n7hkevssfyhswx6zygqif3tiemjmbgz7fa
+```
 
-- [`schema/zap_rns.zap`](schema/zap_rns.zap) — wire format spec in ZAP schema language
+Every PQ-RNS implementation must reproduce this exactly. Conformance tests:
 
-Reference implementations (Go, Rust, TS) land in v0.2 once `zap-proto/spec` provides cross-language codegen for the schema.
+- **Go**: `go test ./...` (this repo)
+- **TypeScript**: [zap-proto/ts](https://github.com/zap-proto/ts) `test/pqrns_did.test.ts`
+- **Python**: [zap-proto/py](https://github.com/zap-proto/py) `tests/test_pqrns_did.py`
+- **Rust**: [zap-proto/rust](https://github.com/zap-proto/rust) `tests/pqrns_did.rs`
 
-## Why
-
-| Property | DNS / mDNS / SPIFFE | `zap-rns` |
-|---|---|---|
-| Confidentiality | TLS (classical) | X-Wing hybrid PQ (default) |
-| Authentication | bearer / TLS cert | KEM keypair at transport |
-| Wire encoding | text or per-protocol binary | ZAP wire, zero-copy |
-| Identity binding | DNS / cert chain | [zap-rns](https://github.com/zap-proto/rns) keypair |
-| Future-quantum | classical only | hybrid by construction |
-
-By the [composability theorem](https://github.com/zap-proto/papers/tree/main/composability), `zap-rns` inherits ZAP-base's PQ confidentiality and mutual auth automatically — no rns-specific PQ analysis required.
-
-## Sub-protocol family
-
-- [`zap-http`](https://github.com/zap-proto/http) — HTTP request/response over ZAP
-- [`zap-ws`](https://github.com/zap-proto/ws) — multi-stream pubsub
-- [`zap-fix`](https://github.com/zap-proto/fix) — FIX 4.4 / 5.0 trading channel
-- [`zap-rns`](https://github.com/zap-proto/rns) — KEM-bound service naming
-- [`zap-mcp`](https://github.com/zap-proto/mcp) — Model Context Protocol over ZAP
-- [`zap-acp`](https://github.com/zap-proto/acp) — Agent Communication Protocol
-- [`zap-a2a`](https://github.com/zap-proto/a2a) — Google Agent2Agent over ZAP
+Drop the same `testdata/pqrns_kat.json` into a new language port and write the local equivalent of the test — that's the floor of conformance.
 
 ## License
 
-MIT OR Apache-2.0
+MIT
