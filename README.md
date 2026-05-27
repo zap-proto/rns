@@ -1,6 +1,6 @@
 # zap-rns
 
-> **Docs:** [Resource Name Service over ZAP](https://zap-proto.dev/docs) · part of the [ZAP Protocol](https://zap-proto.io)
+> **Docs:** [Resource Name Service over ZAP](https://zap-proto.dev/docs/protocols/rns) · part of the [ZAP Protocol](https://zap-proto.io)
 
 
 Resource Name Service over ZAP — service naming bound to KEM keypair.
